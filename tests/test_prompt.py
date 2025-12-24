@@ -111,3 +111,37 @@ def test_prompt_confirm_default():
     output = console.file.getvalue()
     print(repr(output))
     assert output == expected
+
+def test_prompt_str_markup_disabled():
+    INPUT = "egg\nfoo"
+    console = Console(file=io.StringIO(), markup=False)
+    name = Prompt.ask(
+        "what is your name",
+        console=console,
+        choices=["foo", "bar"],
+        default="baz",
+        stream=io.StringIO(INPUT),
+    )
+    assert name == "foo"
+    expected = (
+        "what is your name [foo/bar] (baz): Please select one of the available options\n"
+        "what is your name [foo/bar] (baz): "
+    )
+    output = console.file.getvalue()
+    assert output == expected
+    assert "[prompt.invalid.choice]" not in output
+
+
+def test_prompt_int_markup_disabled():
+    INPUT = "foo\n100"
+    console = Console(file=io.StringIO(), markup=False)
+    number = IntPrompt.ask(
+        "Enter a number",
+        console=console,
+        stream=io.StringIO(INPUT),
+    )
+    assert number == 100
+    expected = "Enter a number: Please enter a valid integer number\nEnter a number: "
+    output = console.file.getvalue()
+    assert output == expected
+    assert "[prompt.invalid]" not in output
